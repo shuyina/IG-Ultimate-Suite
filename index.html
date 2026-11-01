@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Safe Media Downloader — Ultimate Suite v29.0</title>
+<style>
+  :root{
+    --bg:#0b1220; --panel:#0f172a; --panel2:#111c33; --border:#1f2d4a;
+    --text:#f1f5f9; --mut:#8ea0bd; --acc:#2563eb; --green:#16a34a; --red:#dc2626; --orange:#ea580c;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:linear-gradient(180deg,#0b1220,#0a0f1c);color:var(--text);
+    font-family:system-ui,-apple-system,'Segoe UI',sans-serif;padding:20px 16px 96px;max-width:1200px;margin:0 auto}
+  
+  header{margin-bottom:18px; text-align:center;}
+  header h1{font-size:22px;letter-spacing:.3px}
+  header .sub{color:var(--mut);font-size:13px;margin-top:4px}
+  .ver{background:var(--acc);color:#fff;border-radius:20px;padding:2px 10px;font-size:11px;margin-left:8px;vertical-align:middle}
+  
+  .panel{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:16px}
+  .panel h2{font-size:15px;margin-bottom:10px}
+  .panel p{color:var(--mut);font-size:13px;line-height:1.6;margin-bottom:10px}
+  code{background:#1e293b;border-radius:5px;padding:1px 6px;font-size:12px;color:#7dd3fc}
+  textarea{width:100%;background:#0a0f1e;color:#cbd5e1;border:1px solid var(--border);border-radius:10px;
+    padding:10px;font-family:ui-monospace,Consolas,monospace;font-size:11px;resize:vertical}
+  #pasteBox{height:100px;font-size:12px}
+  
+  .btn{background:var(--acc);color:#fff;border:none;border-radius:9px;padding:9px 14px;font-size:13px;
+    font-weight:600;cursor:pointer;text-decoration:none;display:inline-block;transition:filter .15s}
+  .btn:hover{filter:brightness(1.15)}
+  .btn.green{background:var(--green)}
+  .btn.orange{background:var(--orange)}
+  .btn.ghost{background:#1e293b;color:#cbd5e1}
+  .btn.danger{background:#7f1d1d;color:#fecaca}
+  .btn.sm{padding:6px 10px;font-size:12px}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
+  
+  /* Bookmarklet Zone */
+  .bm-box{display:flex;align-items:center;gap:16px;background:var(--panel2);border:2px dashed var(--acc);padding:20px;border-radius:12px;margin:12px 0;}
+  .bm-link{background:var(--acc);color:#fff;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px;cursor:grab;box-shadow:0 4px 12px rgba(37,99,235,0.4);display:inline-block;transition:transform 0.1s;}
+  .bm-link:active{cursor:grabbing; transform:scale(0.95);}
+
+  /* Tabs */
+  .tabs{display:flex;gap:8px;margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:10px}
+  .tab-btn{background:transparent;border:1px solid transparent;color:var(--mut);padding:8px 16px;font-size:14px;font-weight:600;cursor:pointer;border-radius:8px;transition:all .2s}
+  .tab-btn:hover{background:rgba(255,255,255,0.05)}
+  .tab-btn.active{background:var(--panel);border-color:var(--border);color:var(--text)}
+  .tab-content{display:none}
+  .tab-content.active{display:block;animation:fadeIn .3s}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+
+  /* Gallery */
+  .toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+  .chips{display:flex;gap:6px;flex-wrap:wrap}
+  .chip{background:#1e293b;border:1px solid var(--border);color:var(--mut);border-radius:20px;
+    padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer}
+  .chip.active{background:var(--acc);border-color:var(--acc);color:#fff}
+  .chip span{background:rgba(0,0,0,.3);border-radius:10px;padding:1px 7px;margin-left:4px;font-size:11px}
+  #searchBox{flex:1;min-width:150px;background:#0a0f1e;border:1px solid var(--border);border-radius:9px;
+    color:var(--text);padding:7px 12px;font-size:12px;outline:none}
+  .selall{font-size:12px;color:var(--mut);display:flex;align-items:center;gap:6px;cursor:pointer;user-select:none}
+  .selall input{width:15px;height:15px;accent-color:var(--acc)}
+  .stats{font-size:12px;color:var(--mut);margin:4px 0 12px}
+  
+  .items.grid-view{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:12px}
+  .items.list-view{display:flex;flex-direction:column;gap:8px}
+  .card{background:var(--panel2);border:1px solid #24324d;border-radius:12px;overflow:hidden;position:relative;transition:transform .12s}
+  .card:hover{transform:translateY(-2px)}
+  .card.selected{outline:2px solid #3b82f6}
+  .thumb{aspect-ratio:1/1;position:relative;cursor:zoom-in;background:#0a0f1e}
+  .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+  .thumb .ph{position:absolute;inset:0;display:none;align-items:center;justify-content:center;font-size:40px;opacity:.6}
+  .thumb.noimg .ph{display:flex}
+  .badge{position:absolute;top:6px;left:6px;font-size:10px;font-weight:700;border-radius:6px;padding:2px 7px;color:#fff}
+  .b-video{background:rgba(220,38,38,.9)} .b-image{background:rgba(14,165,233,.9)}
+  .play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:34px;color:rgba(255,255,255,.9);text-shadow:0 2px 10px rgba(0,0,0,.8)}
+  .chk{position:absolute;top:6px;right:6px;z-index:3;background:rgba(2,6,23,.55);border-radius:6px;padding:3px;line-height:0}
+  .chk input{width:15px;height:15px;accent-color:var(--acc);cursor:pointer}
+  .info{padding:8px 10px}
+  .ttl{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .url{font-size:10px;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+  .btns{display:flex;gap:4px;margin-top:7px}
+  .mini{background:#1e293b;border:1px solid #334155;border-radius:6px;color:#cbd5e1;padding:3px 8px;font-size:12px;cursor:pointer}
+  .mini:hover{background:#334155}
+  .mini.acc{background:var(--acc);border-color:var(--acc);color:#fff}
+  .mini.danger:hover{background:#7f1d1d}
+  .items.list-view .card{display:flex;flex-direction:row;align-items:center;gap:12px;padding-right:10px}
+  .items.list-view .thumb{width:80px;height:80px;flex:none;aspect-ratio:auto;border-radius:8px;margin:8px}
+  .items.list-view .info{flex:1;min-width:0}
+  .items.list-view .chk{position:static;margin-left:10px;order:5}
+  .empty{grid-column:1/-1;text-align:center;color:var(--mut);padding:50px 20px;font-size:13px;line-height:1.8}
+  
+  /* Modal */
+  #modal{position:fixed;inset:0;background:rgba(2,6,23,.94);display:none;z-index:9999;align-items:center;justify-content:center}
+  #modal.open{display:flex}
+  .m-body{max-width:92vw;text-align:center}
+  #stage{display:flex;align-items:center;justify-content:center;min-height:200px}
+  .m-bar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-top:12px;flex-wrap:wrap}
+  .m-title{font-size:13px;font-weight:600;max-width:52vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .m-count{font-size:11px;color:var(--mut);margin-top:2px}
+  .m-actions{display:flex;gap:6px}
+  .m-btn{position:fixed;background:rgba(30,41,59,.85);border:1px solid #334155;color:#fff;border-radius:50%;
+    width:44px;height:44px;font-size:22px;cursor:pointer;z-index:10000;display:flex;align-items:center;justify-content:center}
+  .m-btn:hover{background:#334155}
+  .m-close{top:16px;right:16px}
+  .m-prev{left:16px;top:50%;transform:translateY(-50%)}
+  .m-next{right:16px;top:50%;transform:translateY(-50%)}
+  
+  /* statusbar / toast */
+  #statusbar{position:fixed;left:0;right:0;bottom:0;background:rgba(15,23,42,.97);border-top:1px solid var(--border);
+    padding:9px 16px;display:flex;align-items:center;gap:12px;font-size:12px;z-index:9000}
+  #sbText{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#cbd5e1}
+  .sb-track{width:220px;height:6px;background:#1e293b;border-radius:4px;overflow:hidden;flex:none}
+  #sbBar{height:100%;width:0;background:linear-gradient(90deg,#22c55e,#3b82f6);transition:width .3s}
+  #toast{position:fixed;bottom:60px;left:50%;transform:translateX(-50%) translateY(20px);background:#1e293b;
+    border:1px solid #334155;color:#f8fafc;padding:10px 18px;border-radius:10px;font-size:13px;opacity:0;
+    pointer-events:none;transition:all .25s;z-index:9500;max-width:90vw;text-align:center}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🎬 IG Ultimate Suite <span class="ver">v29.0</span></h1>
+  <div class="sub">The v18.0 HTML Engine + 1-Click Bookmarklet + CORS Proxy Fallback</div>
+</header>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('tab-scan')">🛡️ 1. Scan Instagram</button>
+  <button class="tab-btn" onclick="switchTab('tab-gallery')">🖼️ 2. Gallery & Download</button>
+</div>
+
+<!-- TAB 1: SCANNER -->
+<div id="tab-scan" class="tab-content active">
+  
+  <section class="panel">
+    <h2>🚀 The "No F12" Way (Bookmarklet)</h2>
+    <p>Stop copy-pasting scripts. Just drag this blue button to your browser's <b>Bookmarks Bar</b>.</p>
+    
+    <div class="bm-box">
+      <a id="bookmarkletLink" class="bm-link" href="#" onclick="alert('Drag me to your bookmarks bar!'); return false;">⚡ Scan IG Media (v29 Engine)</a>
+      <div>
+        <b>How to use:</b><br>
+        1. Drag the button to your bookmarks bar.<br>
+        2. Go to any Instagram profile.<br>
+        3. Click the bookmark. The scanner panel will appear!
+      </div>
+    </div>
+    <div style="background:#1e293b;padding:12px;border-radius:8px;font-size:12px;margin-top:12px;color:#cbd5e1;">
+      💡 <b>Pro-Tip for Videos:</b> If downloading videos from this local HTML file opens too many tabs, simply use the <b>🎥 Download MP4s</b> button directly on the floating Instagram panel. Because it runs on Instagram itself, it has zero CORS restrictions and downloads everything silently!
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>📥 Paste JSON Results Here</h2>
+    <p>After the scanner finishes on Instagram, click <b>Copy All (JSON)</b>. Paste it below to load it into your gallery.</p>
+    <textarea id="pasteBox" placeholder='Paste JSON here...'></textarea>
+    <div class="row">
+      <button class="btn green" id="btnLoadJson">📥 Load Media into Queue</button>
+      <button class="btn ghost" id="btnPasteClip">📋 Paste from Clipboard</button>
+    </div>
+  </section>
+
+</div>
+
+<!-- TAB 2: GALLERY -->
+<div id="tab-gallery" class="tab-content">
+  <section class="panel">
+    <h2>🖼️ Media Queue</h2>
+
+    <div class="toolbar">
+      <div class="chips">
+        <button class="chip active" id="fAll"  onclick="App.setFilter('all')">All <span id="cntAll">0</span></button>
+        <button class="chip" id="fVids" onclick="App.setFilter('videos')">🎥 Videos 🔊 <span id="cntVids">0</span></button>
+        <button class="chip" id="fImgs" onclick="App.setFilter('images')">📷 HD Photos <span id="cntImgs">0</span></button>
+      </div>
+      <input id="searchBox" type="search" placeholder="🔍 Search title or URL…" oninput="App.setSearch(this.value)">
+      <button class="btn sm ghost" id="btnGrid" onclick="App.setView('gallery')">▦ Gallery</button>
+      <button class="btn sm ghost" id="btnList" onclick="App.setView('list')">☰ List</button>
+    </div>
+
+    <div class="toolbar">
+      <label class="selall"><input type="checkbox" id="chkAll" onchange="App.selectAllVisible(this.checked)"> Select all</label>
+      <button class="btn green" id="btnDlSel" onclick="App.downloadSelected()">⬇ Download Selected (0)</button>
+      <button class="btn" onclick="App.downloadAllVideos()">🎥 Download All Videos</button>
+      <button class="btn" onclick="App.downloadAllPhotos()">📷 Download All Photos</button>
+      <button class="btn ghost sm" onclick="App.clearSel()">Clear Selection</button>
+      <button class="btn danger sm" onclick="App.clearAll()">🗑 Clear Queue</button>
+    </div>
+
+    <div class="stats" id="statsLine">Total Items: 0 • Saved: 0 • Opened in new tab: 0</div>
+    <div id="items" class="items grid-view"></div>
+  </section>
+</div>
+
+<!-- MODAL -->
+<div id="modal" role="dialog">
+  <button class="m-btn m-close" onclick="App.closePreview()" title="Close (Esc)">✕</button>
+  <button class="m-btn m-prev" onclick="App.navPreview(-1)" title="Previous (←)">‹</button>
+  <div class="m-body">
+    <div id="stage"></div>
+    <div class="m-bar">
+      <div style="text-align:left;">
+        <div id="pvTitle" class="m-title"></div>
+        <div id="pvCounter" class="m-count"></div>
+      </div>
+      <div class="m-actions">
+        <button class="btn green" id="pvDl">⬇ Download</button>
+        <button class="btn ghost" id="pvCopy">🔗 Copy URL</button>
+        <a class="btn ghost" id="pvOpen" href="#" target="_blank" rel="noopener">↗ Open</a>
+      </div>
+    </div>
+  </div>
+  <button class="m-btn m-next" onclick="App.navPreview(1)" title="Next (→)">›</button>
+</div>
+
+<div id="statusbar">
+  <span id="sbText">Ready.</span>
+  <div class="sb-track"><div id="sbBar"></div></div>
+</div>
+<div id="toast"></div>
+
+<!-- ========================================== -->
+<!-- HIDDEN SCRIPT PAYLOAD (v29.0 With Download Buttons) -->
+<!-- ========================================== -->
+<script id="v18-payload" type="text/plain">
+(async () => {
+  const old = document.getElementById('ig-dl-hub');
+  if (old) old.remove();
+
+  window.__ig_harvest = window.__ig_harvest || new Map();
+  const mediaMap = window.__ig_harvest;
+
+  const pathname = window.location.pathname;
+  const isReelsTab = pathname.includes('/reels');
+  const pathParts = pathname.split('/').filter(Boolean);
+  const username = (pathParts[0] === 'popular' ? pathParts[1] : pathParts[0]) || 'profile';
+  const mainGridUrl = 'https://www.instagram.com/' + username + '/';
+  const reelsUrl = 'https://www.instagram.com/' + username + '/reels/';
+
+  const getCsrfToken = () => {
+    const m = document.cookie.match(/csrftoken=([^;]+)/);
+    return m ? m[1] : '';
+  };
+
+  const discoveredShortcodes = new Map();
+  const resolvedShortcodes = new Set();
+  const videoIntentCodes = new Set();
+  let clipsEndpointBlocked = false;
+  let mediaInfoEndpointBlocked = false;
+  let graphQLEndpointBlocked = false;
+  const seenVideoResources = new Set();
+  let isScrolling = false;
+  let stopRequested = false;
+
+  const hub = document.createElement('div');
+  hub.id = 'ig-dl-hub';
+  hub.style.cssText = 'position:fixed;top:16px;right:16px;z-index:9999999;width:420px;max-height:94vh;overflow:auto;background:#0f172a;color:#f8fafc;padding:16px;border-radius:16px;box-shadow:0 20px 50px rgba(0,0,0,0.95);border:1px solid #334155;font-family:system-ui,-apple-system,sans-serif;font-size:13px;display:flex;flex-direction:column;gap:10px;';
+  hub.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <b>🎬 IG Ripper v29.0</b>
+      <span id="hub-close" style="cursor:pointer;font-weight:bold;padding:2px 8px;border-radius:6px;background:#1e293b;">✕</span>
+    </div>
+    <div style="font-size:12px;color:#94a3b8;line-height:1.45;">
+      ${isReelsTab
+        ? '🎥 <b>Reels Tab Active:</b> Resolving distinct MP4 video streams with sound.'
+        : '📸 <b>Main Profile Grid:</b> Crawling Posts, Carousel Albums & Feed Videos.'}
+    </div>
+    <div id="hub-status" style="font-size:12px;color:#cbd5e1;background:#1e293b;padding:8px 10px;border-radius:8px;min-height:18px;">🗑️ Reset Ready. Click "🚀 Deep Scan All" to start!</div>
+    <div style="background:#1e293b;border-radius:6px;overflow:hidden;height:8px;">
+      <div id="hub-bar" style="width:0%;height:100%;background:linear-gradient(90deg,#22c55e,#3b82f6);transition:width .3s;"></div>
+    </div>
+    <div style="display:flex;gap:14px;font-size:12px;color:#94a3b8;">
+      <span>🎥 MP4s (🔊): <b id="hub-vids" style="color:#f8fafc;">0</b></span>
+      <span>📷 HD Photos: <b id="hub-imgs" style="color:#f8fafc;">0</b></span>
+      <span>Total: <b id="hub-total" style="color:#f8fafc;">0</b></span>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;">
+      <button id="hub-autoscroll" style="flex:1 1 100%;padding:10px;border:none;border-radius:8px;background:#2563eb;color:#fff;cursor:pointer;font-weight:700;">🚀 Deep Scan All</button>
+      <button id="hub-copy-json" style="flex:1;padding:8px;border:none;border-radius:8px;background:#16a34a;color:#fff;cursor:pointer;font-weight:600;">📋 Copy All (JSON)</button>
+      <button id="hub-reset-mem" style="padding:8px 10px;border:none;border-radius:8px;background:#7f1d1d;color:#fecaca;cursor:pointer;font-weight:600;">🗑️ Reset</button>
+      <button id="hub-download-vids" style="flex:1;padding:8px;border:none;border-radius:8px;background:#4f46e5;color:#fff;cursor:pointer;font-weight:600;">🎥 Download MP4s</button>
+      <button id="hub-download-imgs" style="flex:1;padding:8px;border:none;border-radius:8px;background:#0ea5e9;color:#fff;cursor:pointer;font-weight:600;">📷 Download HD Photos</button>
+    </div>
+    <div id="hub-log" style="max-height:110px;overflow:auto;font-size:11px;color:#64748b;display:flex;flex-direction:column;gap:2px;"></div>
+  `;
+  document.body.appendChild(hub);
+
+  document.getElementById('hub-close').onclick = () => hub.remove();
+  document.getElementById('hub-reset-mem').onclick = () => {
+    mediaMap.clear();
+    discoveredShortcodes.clear();
+    resolvedShortcodes.clear();
+    videoIntentCodes.clear();
+    updateCounters();
+    updateStatus('Cleared memory. Ready for fresh scan.', 0);
+  };
+
+  const updateStatus = (text, pct, log) => {
+    const s = document.getElementById('hub-status');
+    const b = document.getElementById('hub-bar');
+    const l = document.getElementById('hub-log');
+    if (s) s.innerText = text;
+    if (b && pct !== undefined) b.style.width = pct + '%';
+    if (l && log) {
+      const p = document.createElement('div');
+      p.innerText = log;
+      l.prepend(p);
+    }
+  };
+
+  const updateCounters = () => {
+    const items = Array.from(mediaMap.values());
+    const vids = items.filter(m => m.type === 'video').length;
+    const imgs = items.filter(m => m.type === 'image').length;
+    const vEl = document.getElementById('hub-vids');
+    const iEl = document.getElementById('hub-imgs');
+    const tEl = document.getElementById('hub-total');
+    if (vEl) vEl.innerText = vids;
+    if (iEl) iEl.innerText = imgs;
+    if (tEl) tEl.innerText = items.length;
+  };
+
+  const cleanHdPhotoUrl = (rawUrl) => {
+    if (!rawUrl) return null;
+    let uStr = String(rawUrl).replace(/&amp;/g, '&').replace(/\\u0026/g, '&').replace(/\\\//g, '/');
+    if (uStr.includes('/rsrc.php/') || uStr.includes('static.cdninstagram.com') || uStr.includes('logging_client_events')) return null;
+    if (uStr.includes('/t15.')) return null;
+    return uStr;
+  };
+
+  const cleanVideoUrl = (rawUrl) => {
+    if (!rawUrl) return null;
+    const u = String(rawUrl).replace(/&amp;/g, '&').replace(/\\u0026/g, '&').replace(/\\\//g, '/').trim();
+    return /^https?:\/\//i.test(u) ? u : null;
+  };
+
+  const getVideoCandidates = (item) => {
+    if (!item || typeof item !== 'object') return [];
+    const pools = [item.video_versions, item.video_resources, item.videoVersions, item.videoResources,
+      item.video?.video_versions, item.video?.resources];
+    const out = [];
+    const add = (entry) => {
+      if (!entry) return;
+      if (typeof entry === 'string') {
+        const url = cleanVideoUrl(entry);
+        if (url) out.push({ url, width: 0, height: 0 });
+        return;
+      }
+      if (Array.isArray(entry)) { entry.forEach(add); return; }
+      if (typeof entry === 'object') {
+        const candidate = entry.url || entry.src || entry.source_url || entry.video_url || entry.download_url;
+        if (candidate) {
+          const url = cleanVideoUrl(candidate);
+          if (url) out.push({ url, width: Number(entry.width || entry.config_width || 0), height: Number(entry.height || entry.config_height || 0) });
+        }
+      }
+    };
+    pools.forEach(add);
+    [item.video_url, item.videoUrl, item.playback_url, item.playbackUrl, item.video_src,
+      item.video?.url, item.video?.src].forEach(add);
+    const seen = new Set();
+    return out.filter(v => !seen.has(v.url) && seen.add(v.url))
+      .sort((a, b) => (b.width * b.height || b.width) - (a.width * a.height || a.width));
+  };
+
+  const isVideoMedia = (item, candidates) => {
+    const type = String(item?.media_type ?? '').toLowerCase();
+    const typename = String(item?.__typename || item?.typename || '').toLowerCase();
+    return !!(candidates?.length || item?.is_video === true || item?.isVideo === true ||
+      type === '2' || type === 'video' || type === 'clips' ||
+      String(item?.product_type || '').toLowerCase() === 'clips' ||
+      typename.includes('video') || typename.includes('clip'));
+  };
+
+  const getPhotoUrl = (item) => item?.image_versions2?.candidates?.[0]?.url ||
+    item?.image_versions?.candidates?.[0]?.url || item?.display_url || item?.thumbnail_url ||
+    item?.thumbnail_src || item?.image_url || null;
+
+  const getCarouselChildren = (item) => {
+    if (Array.isArray(item?.carousel_media)) return item.carousel_media;
+    const edges = item?.edge_sidecar_to_children?.edges || item?.carousel_media?.edges ||
+      item?.sidecar?.edges || [];
+    return Array.isArray(edges) ? edges.map(edge => edge?.node || edge).filter(Boolean) : [];
+  };
+
+  const addItem = (type, url, thumb, key, title) => {
+    if (!url) return;
+    if (type === 'video') {
+      const baseKey = String(key).replace(/^vid_/, '');
+      mediaMap.delete('img_grid_' + baseKey);
+      mediaMap.delete('img_' + baseKey);
+    }
+    for (const [existingKey, existing] of mediaMap.entries()) {
+      if (existing.url === url && existing.type === type && existingKey !== key) return;
+    }
+    mediaMap.set(key, {
+      type,
+      url,
+      thumb: thumb || url,
+      title: title || (type === 'video' ? 'Video MP4 (' + String(key).slice(-8) + ') 🔊' : 'HD Photo (' + String(key).slice(-8) + ')')
+    });
+    updateCounters();
+  };
+
+  const processMediaItem = (rawItem, shortcode) => {
+    if (!rawItem) return;
+    const item = rawItem.media || rawItem.node || rawItem.item || rawItem;
+    const code = shortcode || item.code || item.shortcode || item.pk || item.id || 'unknown';
+    const thumb = getPhotoUrl(item);
+    const children = getCarouselChildren(item);
+
+    if (children.length) {
+      children.forEach((sub, idx) => {
+        const subItem = sub.media || sub.node || sub;
+        const videos = getVideoCandidates(subItem);
+        const photo = getPhotoUrl(subItem) || thumb;
+        if (videos.length) {
+          addItem('video', videos[0].url, photo, 'vid_' + code + '_slide' + (idx + 1),
+            'Carousel Video #' + (idx + 1) + ' (' + code + ') 🔊');
+        } else if (!isVideoMedia(subItem, videos) && photo) {
+          const imgUrl = cleanHdPhotoUrl(photo);
+          if (imgUrl) addItem('image', imgUrl, imgUrl, 'img_' + code + '_slide' + (idx + 1),
+            'Carousel Photo #' + (idx + 1) + ' (' + code + ')');
+        }
+      });
+      return;
+    }
+
+    const videos = getVideoCandidates(item);
+    if (videos.length) {
+      addItem('video', videos[0].url, thumb, 'vid_' + code, 'Reel / Video (' + code + ') 🔊');
+      return;
+    }
+
+    if (isVideoMedia(item, videos)) {
+      if (code !== 'unknown') videoIntentCodes.add(String(code));
+      return;
+    }
+
+    if (!isReelsTab && thumb) {
+      const imgUrl = cleanHdPhotoUrl(thumb);
+      if (imgUrl) addItem('image', imgUrl, imgUrl, 'img_' + code, 'HD Photo Post (' + code + ')');
+    }
+  };
+
+  const scanReactFiber = () => {
+    document.querySelectorAll('a[href*="/p/"], a[href*="/reel/"], article, main, div[role="presentation"]').forEach(el => {
+      const key = Object.keys(el).find(k => k.startsWith('__reactFiber$') || k.startsWith('__reactInternalInstance$'));
+      if (!key) return;
+      let curr = el[key], depth = 0;
+      while (curr && depth < 30) {
+        depth++;
+        const p = curr.memoizedProps;
+        if (p) {
+          const m = p.media || p.post || p.item?.media || p.item || p.clip;
+          if (m && (m.video_versions || m.video_resources || m.video_url || m.videoVersions || m.videoResources || m.carousel_media || m.edge_sidecar_to_children || m.is_video || String(m.media_type) === '2' || m.image_versions2 || m.display_url)) {
+            processMediaItem(m, m.code || m.shortcode);
+          }
+        }
+        curr = curr.return;
+      }
+    });
+  };
+
+  const harvestVisibleShortcodes = () => {
+    document.querySelectorAll('a[href*="/reel/"], a[href*="/p/"]').forEach(a => {
+      const match = a.href.match(/\/(reel|p)\/([A-Za-z0-9_-]+)/);
+      if (match) {
+        const code = match[2];
+        const previous = discoveredShortcodes.get(code);
+        const img = a.querySelector('img');
+        const thumb = img ? (img.currentSrc || img.src) : '';
+        const isReel = match[1] === 'reel' || isReelsTab ||
+          !!a.querySelector('video, svg[aria-label*="video" i], svg[aria-label*="reel" i], [aria-label*="Play" i], [aria-label*="Clip" i], [aria-label*="Reel" i], [aria-label*="Video" i]');
+        discoveredShortcodes.set(code, { code, isReel: isReel || !!previous?.isReel, thumb: thumb || previous?.thumb || '' });
+      }
+    });
+    updateCounters();
+  };
+
+  const extractPolarisMedia = (html) => {
+    const marker = 'xig_polaris_media';
+    let start = html.indexOf(marker);
+    if (start === -1) return null;
+    let depth = 0;
+    let jsonStart = -1;
+    for (let i = start; i >= 0; i--) {
+      if (html[i] === '{') {
+        if (depth === 0) { jsonStart = i; break; }
+        depth--;
+      } else if (html[i] === '}') {
+        depth++;
+      }
+    }
+    if (jsonStart === -1) return null;
+    depth = 0;
+    let jsonEnd = -1;
+    for (let i = jsonStart; i < html.length; i++) {
+      if (html[i] === '{') depth++;
+      else if (html[i] === '}') {
+        depth--;
+        if (depth === 0) { jsonEnd = i + 1; break; }
+      }
+    }
+    if (jsonEnd === -1) return null;
+    try {
+      const parsed = JSON.parse(html.slice(jsonStart, jsonEnd));
+      const findMedia = (obj, d = 0) => {
+        if (!obj || typeof obj !== 'object' || d > 8) return null;
+        if (obj.video_versions || obj.image_versions2 || obj.carousel_media || obj.edge_sidecar_to_children) return obj;
+        for (const k of ['xig_polaris_media', 'if_not_gated_logged_out', 'media', 'node', 'items', 'data', 'result']) {
+          if (obj[k]) {
+            const found = findMedia(obj[k], d + 1);
+            if (found) return found;
+          }
+        }
+        return null;
+      };
+      return findMedia(parsed);
+    } catch (e) {
+      return null;
+    }
+  };
+
+  const fetchPostDetailsViaHTML = async (shortcode) => {
+    const urls = [
+      'https://www.instagram.com/p/' + shortcode + '/',
+      'https://www.instagram.com/reel/' + shortcode + '/'
+    ];
+    for (const postUrl of urls) {
+      try {
+        const res = await fetch(postUrl, {
+          credentials: 'same-origin',
+          headers: {
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8'
+          }
+        });
+        if (!res.ok) continue;
+        const html = await res.text();
+        if (/<title[^>]*>\s*Login\s*•\s*Instagram\s*<\/title>/i.test(html) ||
+            html.includes('accounts/login')) {
+          updateStatus('HTML page redirected to login for ' + shortcode + '; skipping.', undefined,
+            'HTML login wall for ' + shortcode);
+          continue;
+        }
+        const media = extractPolarisMedia(html);
+        if (media) {
+          updateStatus('HTML extraction succeeded for ' + shortcode + '.', undefined,
+            'HTML OK: ' + shortcode);
+          return media;
+        }
+      } catch (e) {}
+    }
+    return null;
+  };
+
+  const fetchPostDetails = async (shortcode) => {
+    const htmlMedia = await fetchPostDetailsViaHTML(shortcode);
+    if (htmlMedia) return htmlMedia;
+
+    if (mediaInfoEndpointBlocked) return null;
+    try {
+      const mediaId = shortcodeToMediaId(shortcode);
+      if (!mediaId) return null;
+      const headers = {
+        'Accept': 'application/json',
+        'X-IG-App-ID': '936619743392459',
+        'X-Requested-With': 'XMLHttpRequest'
+      };
+      const csrf = getCsrfToken();
+      if (csrf) headers['X-CSRFToken'] = csrf;
+      const res = await fetch('https://www.instagram.com/api/v1/media/' + mediaId + '/info/', {
+        method: 'GET', credentials: 'same-origin', headers
+      });
+      const contentType = res.headers.get('content-type') || '';
+      const body = await res.text();
+      if (!res.ok || /html/i.test(contentType) || body.trimStart().startsWith('<')) {
+        mediaInfoEndpointBlocked = true;
+        return null;
+      }
+      const json = JSON.parse(body);
+      return json?.items?.[0] || json?.media || null;
+    } catch (e) {
+      return null;
+    }
+  };
+
+  const shortcodeToMediaId = (code) => {
+    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+    try {
+      let id = 0n;
+      for (const ch of String(code)) {
+        const n = alphabet.indexOf(ch);
+        if (n < 0) return null;
+        id = (id << 6n) + BigInt(n);
+      }
+      return id.toString();
+    } catch (e) { return null; }
+  };
+
+  const isDirectVideoUrl = (raw) => {
+    if (!raw || !/^https?:\/\//i.test(raw)) return false;
+    if (raw.includes('bytestart=') || raw.includes('byteend=')) return false;
+
+    try {
+      const u = new URL(raw);
+      const host = u.hostname.toLowerCase();
+      const trustedCdn = host.includes('cdninstagram.com') || host.includes('fbcdn.net');
+      const videoPath = /\.(mp4|m4v|webm)(?:$|[?#])/i.test(u.href) ||
+        /video_dashinit/i.test(u.href) || /mime_type=video_mp4/i.test(u.href);
+      return trustedCdn && videoPath;
+    } catch (e) { return false; }
+  };
+
+  const scanVideoElements = () => {
+    document.querySelectorAll('video').forEach((video, idx) => {
+      const sources = [video.currentSrc, video.src, video.querySelector('source')?.src].filter(Boolean);
+      const src = sources.find(isDirectVideoUrl);
+      if (src) {
+        const poster = video.poster || '';
+        addItem('video', cleanVideoUrl(src), poster, 'vid_dom_' + idx + '_' + src.slice(-18), 'Visible Instagram Video ' + (idx + 1) + ' 🔊');
+      }
+    });
+
+    try {
+      performance.getEntriesByType('resource').forEach((entry, idx) => {
+        const url = entry.name;
+        if (!isDirectVideoUrl(url) || seenVideoResources.has(url)) return;
+        seenVideoResources.add(url);
+        addItem('video', cleanVideoUrl(url), '', 'vid_resource_' + idx + '_' + url.slice(-18), 'Loaded CDN Video Stream ' + (seenVideoResources.size) + ' 🔊');
+      });
+    } catch (e) {}
+  };
+
+  const resolveDiscoveredShortcodes = async () => {
+    const toResolve = Array.from(discoveredShortcodes.values()).filter(item => {
+      const hasVid = Array.from(mediaMap.keys()).some(k => k === 'vid_' + item.code || k.startsWith('vid_' + item.code + '_'));
+      const hasImg = Array.from(mediaMap.keys()).some(k => k === 'img_' + item.code || k === 'img_grid_' + item.code || k.startsWith('img_' + item.code + '_slide'));
+      const needsVideoCheck = !!item.isReel || videoIntentCodes.has(item.code) || isReelsTab;
+      return !hasVid && !resolvedShortcodes.has(item.code) && (needsVideoCheck || !hasImg);
+    });
+
+    if (toResolve.length === 0) {
+      updateCounters();
+      const items = Array.from(mediaMap.values());
+      const vids = items.filter(m => m.type === 'video').length;
+      const imgs = items.filter(m => m.type === 'image').length;
+      updateStatus('🎉 Scan Complete! Found ' + vids + ' Videos (🔊) & ' + imgs + ' HD Photos!', 100);
+      return;
+    }
+
+    updateStatus('Resolving original streams for ' + toResolve.length + ' items via public HTML...', 50);
+    const batchSize = 2;
+
+    for (let i = 0; i < toResolve.length; i += batchSize) {
+      if (stopRequested) break;
+      const batch = toResolve.slice(i, i + batchSize);
+      await Promise.all(batch.map(async (item) => {
+        const mediaItem = await fetchPostDetails(item.code);
+        if (mediaItem) {
+          processMediaItem(mediaItem, item.code);
+          resolvedShortcodes.add(item.code);
+          return;
+        }
+        if (!item.isReel && !isReelsTab && item.thumb) {
+          const clean = cleanHdPhotoUrl(item.thumb);
+          if (clean && !mediaMap.has('img_' + item.code)) {
+            addItem('image', clean, clean, 'img_grid_' + item.code, 'HD Photo Post (' + item.code + ')');
+          }
+        }
+        resolvedShortcodes.add(item.code);
+      }));
+      const pct = Math.min(98, Math.round(50 + ((i + batch.length) / toResolve.length) * 48));
+      const items = Array.from(mediaMap.values());
+      const vids = items.filter(m => m.type === 'video').length;
+      const imgs = items.filter(m => m.type === 'image').length;
+      updateStatus('Resolving: ' + (i + batch.length) + '/' + toResolve.length + ' (' + vids + ' MP4s 🔊, ' + imgs + ' HD Photos)', pct);
+      await new Promise(r => setTimeout(r, 220));
+    }
+
+    updateCounters();
+    const items = Array.from(mediaMap.values());
+    const vids = items.filter(m => m.type === 'video').length;
+    const imgs = items.filter(m => m.type === 'image').length;
+    updateStatus('🎉 Scan Complete! Total: ' + vids + ' Videos (🔊) & ' + imgs + ' HD Photos!', 100);
+  };
+
+  harvestVisibleShortcodes();
+  scanReactFiber();
+  scanVideoElements();
+  updateCounters();
+  updateStatus('Initial scan done. Click "🚀 Deep Scan All" to crawl everything.', 15, 'Initial scan complete.');
+
+  const scrollBtn = document.getElementById('hub-autoscroll');
+  scrollBtn.onclick = async () => {
+    if (isScrolling) {
+      stopRequested = true;
+      scrollBtn.innerText = 'Stopping...';
+      return;
+    }
+    isScrolling = true;
+    stopRequested = false;
+    scrollBtn.innerText = '⏹️ Stop & Process';
+    scrollBtn.style.background = '#dc2626';
+    updateStatus('Infinite crawler started! Scanning feeds...', 10, 'Crawler initialized.');
+
+    let idleTries = 0;
+    const MAX_IDLE_TRIES = 20;
+    let lastDiscoveredCount = 0;
+
+    while (!stopRequested) {
+      harvestVisibleShortcodes();
+      scanReactFiber();
+      scanVideoElements();
+
+      const currentDiscovered = discoveredShortcodes.size;
+      const vids = Array.from(mediaMap.values()).filter(m => m.type === 'video').length;
+      const imgs = Array.from(mediaMap.values()).filter(m => m.type === 'image').length;
+
+      if (currentDiscovered > lastDiscoveredCount) {
+        idleTries = 0;
+        lastDiscoveredCount = currentDiscovered;
+        updateStatus('🚀 Crawling... Discovered: ' + currentDiscovered + '  (' + vids + ' MP4s 🔊, ' + imgs + ' HD Photos)');
+      } else {
+        idleTries++;
+        updateStatus('⏳ Waiting for Instagram batch (' + idleTries + '/' + MAX_IDLE_TRIES + ')... Discovered: ' + currentDiscovered);
+        window.scrollBy({ top: -350, behavior: 'auto' });
+        await new Promise(r => setTimeout(r, 200));
+        window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'auto' });
+        window.dispatchEvent(new Event('scroll'));
+        document.dispatchEvent(new Event('scroll'));
+        document.querySelectorAll('button, div[role="button"]').forEach(btn => {
+          if (btn.innerText && (btn.innerText.includes('Retry') || btn.innerText.includes('Load more'))) btn.click();
+        });
+        if (idleTries >= MAX_IDLE_TRIES) {
+          updateStatus('🏁 Reached end of feed! Discovered ' + currentDiscovered + ' items.', 50, 'End reached.');
+          break;
+        }
+      }
+      window.scrollBy({ top: 950, behavior: 'smooth' });
+      await new Promise(r => setTimeout(r, 800));
+    }
+
+    isScrolling = false;
+    scrollBtn.innerText = '🚀 Deep Scan All';
+    scrollBtn.style.background = '#2563eb';
+    scanVideoElements();
+    await resolveDiscoveredShortcodes();
+  };
+
+  document.getElementById('hub-copy-json').onclick = async () => {
+    const list = Array.from(mediaMap.values());
+    const text = JSON.stringify(list, null, 2);
+    const btn = document.getElementById('hub-copy-json');
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch (e) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      ta.remove();
+    }
+    btn.innerText = 'Copied! ✓';
+    setTimeout(() => btn.innerText = '📋 Copy All (JSON)', 2500);
+  };
+
+  // --- NEW: DOWNLOAD BATCH DIRECTLY ON INSTAGRAM (NO CORS) ---
+  const downloadBatch = async (items, typeName, btn) => {
+    if (items.length === 0) { updateStatus('No ' + typeName + ' found in memory!', 50); return; }
+    btn.disabled = true;
+    for (let i = 0; i < items.length; i++) {
+      btn.innerText = 'Saving ' + (i + 1) + '/' + items.length + '...';
+      updateStatus('Downloading ' + typeName + ' (' + (i + 1) + '/' + items.length + ')...', Math.round(((i + 1) / items.length) * 100));
+      const ext = items[i].type === 'video' ? 'mp4' : 'jpg';
+      try {
+        const res = await fetch(items[i].url); // Same-origin works!
+        if (res.ok) {
+          const blob = await res.blob();
+          if (blob.size > 2000) {
+            const blobUrl = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = blobUrl;
+            a.download = 'instagram_' + typeName.toLowerCase() + '_' + (i + 1) + '.' + ext;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+            await new Promise(r => setTimeout(r, 700));
+            continue;
+          }
+        }
+      } catch (e) {}
+      const a = document.createElement('a');
+      a.href = items[i].url;
+      a.download = 'instagram_' + typeName.toLowerCase() + '_' + (i + 1) + '.' + ext;
+      a.target = '_blank';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      await new Promise(r => setTimeout(r, 700));
+    }
+    btn.innerText = 'Done! ✅';
+    updateStatus('All ' + typeName + ' processed!', 100);
+    setTimeout(() => {
+      btn.innerText = typeName === 'Videos' ? '🎥 Download MP4s' : '📷 Download HD Photos';
+      btn.disabled = false;
+    }, 3000);
+  };
+
+  document.getElementById('hub-download-vids').onclick = () => {
+    const vids = Array.from(mediaMap.values()).filter(m => m.type === 'video');
+    downloadBatch(vids, 'Videos', document.getElementById('hub-download-vids'));
+  };
+  document.getElementById('hub-download-imgs').onclick = () => {
+    const imgs = Array.from(mediaMap.values()).filter(m => m.type === 'image');
+    downloadBatch(imgs, 'Photos', document.getElementById('hub-download-imgs'));
+  };
+})();
+</script>
+
+<script>
+// ==========================================
+// TAB SWITCHING
+// ==========================================
+function switchTab(id) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+// ==========================================
+// GENERATE BOOKMARKLET FROM HIDDEN SCRIPT
+// ==========================================
+const payloadText = document.getElementById('v18-payload').textContent.trim();
+document.getElementById('bookmarkletLink').href = 'javascript:' + encodeURIComponent(payloadText);
+
+// ==========================================
+// GALLERY LOGIC
+// ==========================================
+let queue = [], filter = 'all', view = 'gallery', search = '';
+const selected = new Set();
+let statSaved = 0, statTab = 0, busy = false;
+let previewList = [], previewIndex = -1;
+
+const $ = id => document.getElementById(id);
+const wait = ms => new Promise(r => setTimeout(r, ms));
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => 'm' + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+
+function toast(msg, ms){
+  const t = $('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), ms || 2600);
+}
+function setStatus(html, pct){
+  $('sbText').innerHTML = html;
+  $('sbBar').style.width = (pct === undefined ? 0 : pct) + '%';
+}
+
+function normalizeItem(raw){
+  if (typeof raw === 'string') raw = { url: raw };
+  if (!raw || typeof raw !== 'object') return null;
+  let url = String(raw.url || raw.src || raw.href || '').trim();
+  if (!/^https?:\/\//i.test(url)) return null;
+  let type = String(raw.type || '').toLowerCase();
+  if (type !== 'video' && type !== 'image') {
+    type = (/\.(mp4|m4v|mov|webm)(\?|$)/i.test(url) || /\/v\//.test(url)) ? 'video' : 'image';
+  }
+  let thumb = String(raw.thumb || raw.thumbnail || raw.poster || '').trim();
+  if (!/^https?:\/\//i.test(thumb)) thumb = (type === 'image') ? url : '';
+  let title = String(raw.title || raw.name || '').trim();
+  if (!title) {
+    const sc = url.match(/\/(p|reel|reels|tv)\/([A-Za-z0-9_-]+)/);
+    title = (type === 'video' ? 'Video' : 'Photo') + (sc ? ' ' + sc[2] : '');
+  }
+  return { id: (typeof raw.id === 'string' && raw.id) ? raw.id : uid(), type, url, thumb, title };
+}
+
+function parseInput(text){
+  text = String(text || '').trim();
+  if (!text) return [];
+  let data = null;
+  try { data = JSON.parse(text); }
+  catch(e){
+    const s = text.indexOf('['), eIdx = text.lastIndexOf(']');
+    if (s > -1 && eIdx > s) { try { data = JSON.parse(text.slice(s, eIdx + 1)); } catch(e2){} }
+  }
+  if (data && !Array.isArray(data)) data = data.items || data.media || data.queue || data.results || data.list || null;
+  if (Array.isArray(data)) return data.map(normalizeItem).filter(Boolean);
+  return text.split(/\r?\n+/).map(l => l.trim()).filter(l => /^https?:\/\//i.test(l)).map(normalizeItem).filter(Boolean);
+}
+
+function mergeItems(items){
+  const known = new Set(queue.map(q => q.url));
+  let added = 0, dup = 0;
+  items.forEach(it => { if (known.has(it.url)) { dup++; return; } known.add(it.url); queue.push(it); added++; });
+  render();
+  toast(added ? ('✅ Loaded ' + added + ' new item(s)' + (dup ? ' (' + dup + ' duplicates skipped)' : '')) : '⚠️ All items already in queue', 3200);
+}
+
+function visibleItems(){
+  return queue.filter(it => {
+    if (filter === 'videos' && it.type !== 'video') return false;
+    if (filter === 'images' && it.type !== 'image') return false;
+    if (search) {
+      const s = search.toLowerCase();
+      if (!(it.title.toLowerCase().includes(s) || it.url.toLowerCase().includes(s))) return false;
+    }
+    return true;
+  });
+}
+
+const shortUrl = u => u.length > 58 ? u.slice(0, 30) + '…' + u.slice(-24) : u;
+
+function cardHTML(it){
+  const isV = it.type === 'video';
+  const thumbImg = it.thumb ? '<img loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="' + esc(it.thumb) + '" alt="" onerror="this.closest(\'.thumb\').classList.add(\'noimg\');this.remove()">' : '';
+  return '<div class="card ' + (isV ? 'is-video' : 'is-image') + (selected.has(it.id) ? ' selected' : '') + '" data-id="' + it.id + '">' +
+    '<label class="chk" title="Select"><input type="checkbox" ' + (selected.has(it.id) ? 'checked' : '') + ' onchange="App.toggleSel(\'' + it.id + '\', this.checked)"></label>' +
+    '<div class="thumb" onclick="App.preview(\'' + it.id + '\')">' + thumbImg +
+      '<div class="ph">' + (isV ? '🎬' : '📷') + '</div>' +
+      '<span class="badge ' + (isV ? 'b-video' : 'b-image') + '">' + (isV ? 'VIDEO 🔊' : 'PHOTO') + '</span>' +
+      (isV ? '<span class="play">▶</span>' : '') +
+    '</div>' +
+    '<div class="info">' +
+      '<div class="ttl" title="' + esc(it.title) + '">' + esc(it.title) + '</div>' +
+      '<div class="url" title="' + esc(it.url) + '">' + esc(shortUrl(it.url)) + '</div>' +
+      '<div class="btns">' +
+        '<button class="mini" title="Preview" onclick="App.preview(\'' + it.id + '\')">👁</button>' +
+        '<button class="mini acc" title="Download" onclick="App.downloadOne(\'' + it.id + '\')">⬇</button>' +
+        '<button class="mini" title="Copy URL" onclick="App.copyUrl(\'' + it.id + '\')">🔗</button>' +
+        '<button class="mini danger" title="Remove" onclick="App.removeItem(\'' + it.id + '\')">✕</button>' +
+      '</div>' +
+    '</div></div>';
+}
+
+function render(){
+  const vids = queue.filter(i => i.type === 'video').length;
+  $('cntAll').textContent = queue.length;
+  $('cntVids').textContent = vids;
+  $('cntImgs').textContent = queue.length - vids;
+  const list = visibleItems();
+  const box = $('items');
+  box.className = 'items ' + (view === 'list' ? 'list-view' : 'grid-view');
+  box.innerHTML = list.length ? list.map(cardHTML).join('') :
+    '<div class="empty"><div style="font-size:42px;">🗂️</div><p><b>Queue is empty</b></p><p>Use the scanner above, then paste the JSON to load media here.</p></div>';
+  updateSelUI();
+  $('statsLine').textContent = 'Total Items: ' + queue.length + ' • Saved: ' + statSaved + ' • Opened in new tab: ' + statTab;
+}
+
+function updateSelUI(){
+  $('btnDlSel').textContent = '⬇ Download Selected (' + selected.size + ')';
+  const list = visibleItems();
+  $('chkAll').checked = list.length > 0 && list.every(it => selected.has(it.id));
+}
+
+function safeName(it){
+  const base = it.title.replace(/[^\w\d\-_ ]+/g, '').trim().slice(0, 60);
+  return (base || 'instagram_media').replace(/\s+/g, '_');
+}
+function triggerDownload(href, name){
+  const a = document.createElement('a');
+  a.href = href; a.download = name; a.rel = 'noopener';
+  document.body.appendChild(a); a.click(); a.remove();
+}
+async function saveItem(it, fallbackName){
+  const ext = it.type === 'video' ? 'mp4' : 'jpg';
+  const name = (fallbackName || safeName(it)) + '.' + ext;
+  try {
+    // Attempt 1: Direct Fetch (Works perfectly for images, often blocked for videos)
+    const res = await fetch(it.url, { mode: 'cors', credentials: 'omit' });
+    if (res.ok) {
+      const blob = await res.blob();
+      if (blob && blob.size > 2000) {
+        const u = URL.createObjectURL(blob);
+        triggerDownload(u, name);
+        setTimeout(() => URL.revokeObjectURL(u), 15000);
+        return 'saved';
+      }
+    }
+  } catch (e) {
+    // CORS blocked. Try Proxy for videos.
+    if (it.type === 'video') {
+      try {
+        const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(it.url);
+        const proxyRes = await fetch(proxyUrl);
+        if (proxyRes.ok) {
+          const blob = await proxyRes.blob();
+          if (blob && blob.size > 2000) {
+            const u = URL.createObjectURL(blob);
+            triggerDownload(u, name);
+            setTimeout(() => URL.revokeObjectURL(u), 15000);
+            return 'saved';
+          }
+        }
+      } catch(proxyErr) {}
+    }
+  }
+  
+  // Attempt 3: Fallback to new tab
+  window.open(it.url, '_blank', 'noopener');
+  return 'fallback';
+}
+async function downloadMany(items, label){
+  if (busy) { toast('⏳ Batch already running…'); return; }
+  if (!items.length) { toast('📭 Nothing to download'); return; }
+  busy = true;
+  if (items.length > 1) toast('🔔 If prompted, ALLOW multiple downloads', 5000);
+  for (let i = 0; i < items.length; i++) {
+    setStatus('⬇ Downloading ' + label + ' ' + (i + 1) + '/' + items.length + ' — ' + esc(items[i].title), Math.round((i / items.length) * 100));
+    const r = await saveItem(items[i], label.toLowerCase().replace(/\s+/g, '_') + '_' + (i + 1));
+    if (r === 'saved') statSaved++; else statTab++;
+    render(); // Update stats
+    if (i < items.length - 1) await wait(1000); // slightly longer wait to prevent tab spam
+  }
+  setStatus('✅ Finished ' + label, 100);
+  toast('✅ Batch finished: ' + items.length + ' item(s)');
+  busy = false;
+}
+async function downloadOne(id){
+  const it = queue.find(q => q.id === id);
+  if (!it) return;
+  setStatus('⬇ Downloading “' + esc(it.title) + '”…');
+  const r = await saveItem(it);
+  if (r === 'saved') { statSaved++; toast('✅ Saved!'); }
+  else { statTab++; toast('🔗 CORS blocked direct save — opened in new tab.', 5000); }
+  render();
+  setStatus('✅ Done', 100);
+}
+
+function preview(id){
+  previewList = visibleItems();
+  previewIndex = previewList.findIndex(x => x.id === id);
+  if (previewIndex < 0) return;
+  renderPreview();
+  $('modal').classList.add('open');
+}
+function renderPreview(){
+  const it = previewList[previewIndex];
+  $('stage').innerHTML = it.type === 'video'
+    ? '<video src="' + esc(it.url) + '"' + (it.thumb ? ' poster="' + esc(it.thumb) + '"' : '') + ' controls autoplay playsinline referrerpolicy="no-referrer" style="max-width:88vw;max-height:76vh;border-radius:10px;"></video>'
+    : '<img src="' + esc(it.url) + '" referrerpolicy="no-referrer" style="max-width:88vw;max-height:76vh;object-fit:contain;border-radius:10px;">';
+  $('pvTitle').textContent = it.title;
+  $('pvCounter').textContent = 'Item ' + (previewIndex + 1) + ' of ' + previewList.length;
+  $('pvDl').onclick = () => downloadOne(it.id);
+  $('pvCopy').onclick = () => copyText(it.url);
+  $('pvOpen').href = it.url;
+}
+function navPreview(d){
+  if (!previewList.length) return;
+  previewIndex = (previewIndex + d + previewList.length) % previewList.length;
+  renderPreview();
+}
+function closePreview(){ $('modal').classList.remove('open'); $('stage').innerHTML = ''; }
+
+async function copyText(t){
+  try { await navigator.clipboard.writeText(t); toast('📋 Copied!'); }
+  catch(e){
+    const ta = document.createElement('textarea');
+    ta.value = t; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); ta.remove(); toast('📋 Copied!');
+  }
+}
+
+// Wiring
+function loadFromPasteBox(){
+  const items = parseInput($('pasteBox').value);
+  if (!items.length) { toast('❌ Could not find any media in the pasted text', 3500); return; }
+  mergeItems(items);
+  $('pasteBox').value = '';
+  switchTab('tab-gallery');
+}
+$('btnLoadJson').onclick = loadFromPasteBox;
+$('btnPasteClip').onclick = async () => {
+  try {
+    const t = await navigator.clipboard.readText();
+    if (!t) { toast('Clipboard is empty'); return; }
+    $('pasteBox').value = t;
+    loadFromPasteBox();
+  } catch(e){ toast('⚠️ Clipboard blocked — click the box and press Ctrl+V'); $('pasteBox').focus(); }
+};
+
+document.addEventListener('keydown', e => {
+  if (!$('modal').classList.contains('open')) return;
+  if (e.key === 'Escape') closePreview();
+  if (e.key === 'ArrowLeft') navPreview(-1);
+  if (e.key === 'ArrowRight') navPreview(1);
+});
+
+window.App = {
+  setFilter(f){
+    filter = f;
+    ['fAll','fVids','fImgs'].forEach(id => $(id).classList.remove('active'));
+    $(f === 'all' ? 'fAll' : f === 'videos' ? 'fVids' : 'fImgs').classList.add('active');
+    render();
+  },
+  setView(v){
+    view = v;
+    $('btnGrid').classList.toggle('active', v === 'gallery');
+    $('btnList').classList.toggle('active', v === 'list');
+    render();
+  },
+  setSearch(s){ search = s.trim(); render(); },
+  toggleSel(id, on){
+    on ? selected.add(id) : selected.delete(id);
+    const card = document.querySelector('.card[data-id="' + id + '"]');
+    if (card) card.classList.toggle('selected', on);
+    updateSelUI();
+  },
+  selectAllVisible(on){ visibleItems().forEach(it => on ? selected.add(it.id) : selected.delete(it.id)); render(); },
+  clearSel(){ selected.clear(); render(); },
+  clearAll(){
+    if (!queue.length) return;
+    if (!confirm('Clear the entire queue (' + queue.length + ' items)?')) return;
+    queue = []; selected.clear(); render(); toast('🗑 Queue cleared');
+  },
+  removeItem(id){
+    queue = queue.filter(q => q.id !== id);
+    selected.delete(id); render();
+  },
+  downloadSelected(){ downloadMany(queue.filter(q => selected.has(q.id)), 'Selected'); },
+  downloadAllVideos(){ downloadMany(queue.filter(q => q.type === 'video'), 'Videos'); },
+  downloadAllPhotos(){ downloadMany(queue.filter(q => q.type === 'image'), 'Photos'); },
+  downloadOne, copyUrl(id){ const it = queue.find(q => q.id === id); if (it) copyText(it.url); },
+  preview, closePreview, navPreview
+};
+
+// Init
+render();
+setStatus('Ready. Drag the blue bookmarklet button to your bookmarks bar!', 0);
+</script>
+</body>
+</html>
